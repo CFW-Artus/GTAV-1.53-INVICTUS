@@ -1,5 +1,14 @@
 #include "natives.h"
 
+// Déclaration des externes si nécessaire
+extern "C" Entity GET_PLAYER_PED(int playerId);
+extern "C" void SET_ENTITY_INVINCIBLE(Entity entity, BOOL toggle);
+
+void setPlayerInvincible(bool enable) {
+    int playerPed = Natives::PLAYER_PED_ID();
+    Natives::SET_ENTITY_INVINCIBLE(playerPed, enable);
+}
+
 // Déclaré dans main.cpp
 extern NativeCall nativeCall;
 
@@ -9,6 +18,18 @@ extern NativeCall nativeCall;
 #define HASH_SET_PLAYER_INVINCIBLE 0x2395FC
 #define HASH_GET_ENTITY_HEALTH     0x3B8558
 #define HASH_SET_ENTITY_HEALTH     0x3BA164
+
+// Exception pour GTA V 1.53
+#define tryMischief do { \
+        try {
+
+#define catchMischief(exc) \
+        } catch (const std::exception& e) { \
+            CALL_NATIVE_HANDLER; \
+        } catch (...) { \
+            CALL_NATIVE_HANDLER; \
+        } \
+    } while (0);
 
 // === Helpers pour appels natifs ===
 template<typename R>

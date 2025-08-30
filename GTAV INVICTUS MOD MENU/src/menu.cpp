@@ -6,15 +6,13 @@ bool Menu::menuOpen = false;
 int Menu::currentOption = 0;
 int Menu::maxOptions = 0;
 std::vector<std::string> Menu::options;
+bool Menu::godModeEnabled = false;
 
 namespace Menu {
 
     void Initialize() {
         options.clear();
         options.push_back("Self Options");
-        options.push_back("Vehicle Spawner");
-        options.push_back("Settings");
-
         maxOptions = options.size();
     }
 
@@ -31,20 +29,29 @@ namespace Menu {
                 Drawing::DrawText(0.5f, y - 0.015f, options[i].c_str());
             }
             else {
-                Drawing::DrawRect(0.5f, y, 0.3f, 0.04f, 0, 0, 0, 150);
+                Drawing::DrawRect(0.5f, y, 0.3f, 0.04f, 50, 50, 50, 200);
                 Drawing::DrawText(0.5f, y - 0.015f, options[i].c_str());
             }
             y += 0.05f;
         }
+
+        // Affichage état God Mode
+        Drawing::DrawText(0.5f, y + 0.01f, godModeEnabled ? "God Mode: ON" : "God Mode: OFF");
     }
 
     void Update() {
-        // Vérifie si la combinaison R1 + → est pressée pour ouvrir/fermer le menu
+        // Ouvre/Ferme le menu avec R1 + →
         if (PAD::IS_CONTROL_PRESSED(0, ControlFrontendRb) && PAD::IS_CONTROL_JUST_PRESSED(0, ControlFrontendRight)) {
             menuOpen = !menuOpen;
         }
 
-        if (!menuOpen) return; // si menu fermé, rien à dessiner
+        if (!menuOpen) return;
+
+        // Ferme le menu avec Rond
+        if (PAD::IS_CONTROL_JUST_PRESSED(0, ControlFrontendCancel)) {
+            menuOpen = false;
+            return;
+        }
 
         // Navigation ↑ ↓
         if (PAD::IS_CONTROL_JUST_PRESSED(0, ControlFrontendUp)) {
@@ -56,15 +63,14 @@ namespace Menu {
             if (currentOption >= maxOptions) currentOption = 0;
         }
 
-        // Validation avec →
+        // Sélection avec →
         if (PAD::IS_CONTROL_JUST_PRESSED(0, ControlFrontendRight)) {
-            // Exemple d’action : toggle GodMode si premier menu
             if (currentOption == 0) {
-                // Appel fonction godmode
+                godModeEnabled = !godModeEnabled;
+                setPlayerInvincible(godModeEnabled);
             }
         }
 
-        // Dessin du menu
         DrawMenu();
     }
 }
